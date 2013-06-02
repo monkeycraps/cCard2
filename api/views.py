@@ -35,12 +35,14 @@ def test(request):
 	# 返回rid 职业列表 
 	profession_list = {}
 	# mbti = Mbti.objects.get( name=mbti_name )
-	sql = 'select p.mbti_pro_id, p.name from mbti inner join mbti_profession_relation r on mbti.mbti_id = r.mbti_id inner join mbti_professions p on r.mbti_pro_id = p.mbti_pro_id ';
+	sql = 'select p.mbti_pro_id, p.name from mbti inner join mbti_profession_relation r on mbti.mbti_id = r.mbti_id inner join mbti_professions p on r.mbti_pro_id = p.mbti_pro_id where mbti.name = \''+ mbti_name +'\' ';
 	cursor = connection.cursor()
 	cursor.execute( sql )
-	rs = cursor.fetchall()
+	rs = dictfetchall( cursor )
+	# logger.info( rs )
 	for one in rs: 
-		profession_list[one.mbti_pro_id] = { 'name': one.name }
+		logger.info( one )
+		profession_list[one['mbti_pro_id']] = { 'name': one['name'] }
 
 	return HttpResponse( json( {'error': 0, 'rid': r.rid, 'profession_list': profession_list } ) );
 
@@ -72,3 +74,12 @@ def uni_str(a, encoding):
 		return a
 	else:
 		return a
+
+
+def dictfetchall(cursor):
+    # "将游标返回的结果保存到一个字典对象中"
+    desc = cursor.description
+    return [
+	    dict(zip([col[0] for col in desc], row))
+	    for row in cursor.fetchall()
+    ]
