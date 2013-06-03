@@ -148,7 +148,7 @@ class Mbti(models.Model):
 
 class MbtiProfessionRelation(models.Model):
     mbti_pro_rel_id = models.IntegerField(primary_key=True)
-    mbti_id = models.ForeignKey()
+    mbti_id = models.IntegerField()
     mbti_pro_id = models.IntegerField()
     class Meta:
         db_table = 'mbti_profession_relation'
@@ -184,8 +184,24 @@ class MbtiSpecialtyPart(models.Model):
     class Meta:
         db_table = 'mbti_specialty_part'
 
+class Pageviewlogs(models.Model):
+    id = models.IntegerField(primary_key=True)
+    uid = models.IntegerField(null=True, blank=True)
+    logtime = models.DateTimeField()
+    user_agent = models.CharField(max_length=512L, blank=True)
+    domain = models.CharField(max_length=255L, blank=True)
+    uri = models.CharField(max_length=2048L)
+    ext1 = models.CharField(max_length=1000L, blank=True)
+    ext2 = models.CharField(max_length=1000L, blank=True)
+    ext3 = models.CharField(max_length=1000L, blank=True)
+    referer = models.CharField(max_length=2048L, blank=True)
+    ip = models.CharField(max_length=100L, blank=True)
+    sessionid = models.CharField(max_length=100L, blank=True)
+    class Meta:
+        db_table = 'pageviewlogs'
+
 class Results(models.Model):
-    field_id = models.IntegerField(primary_key=True, db_column='_id') # Field renamed because it started with '_'.
+    rid = models.IntegerField(primary_key=True)
     e = models.IntegerField(null=True, blank=True)
     i = models.IntegerField(null=True, blank=True)
     s = models.IntegerField(null=True, blank=True)

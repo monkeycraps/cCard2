@@ -27,5 +27,6 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('api.views', 
-	url(r'^api/submitResult', 'test'), 
+	url(r'^api/submitResult', 'submitResult'), 
+	url(r'^api/mbtiinfo', 'mbtiinfo'), 
 )

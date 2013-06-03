@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.core.context_processors import request
 from django.utils import simplejson
 from django.conf import settings
-from app.models import Results, Mbti, MbtiProfessionRelation, MbtiProfessions
+from app.models import Results, Mbti, MbtiProfessionRelation, MbtiProfessions, Pageviewlogs
 from django.db import connection, transaction
 from django.http import Http404
 from datetime import datetime
@@ -11,9 +11,9 @@ from datetime import datetime
 import logging
 logger = logging.getLogger( 'card' );
 
-def test(request):
+def submitResult(request):
 
-	get = request.GET;
+	get = request.REQUEST;
 	logger.info( get )
 	
 	if not (get.get('e') and get.get('s') and get.get('t') and get.get('j') ):
@@ -44,11 +44,30 @@ def test(request):
 		logger.info( one )
 		profession_list[one['mbti_pro_id']] = { 'name': one['name'] }
 
+	pvlog(request, r.rid, mbti_name )
+
 	return HttpResponse( json( {'error': 0, 'rid': r.rid, 'profession_list': profession_list } ) );
 
-def getProfessionList(): 
-	list = []
-	return list
+def mbtiinfo(request): 
+	
+	get = request.REQUEST;
+	
+	if not ( get.get('mbti') ):
+		raise Http404
+
+	mbti = get.get( 'mbti' )
+	rid = get.get( 'rid' )
+	pro_id = get.get( 'pro_id' )
+
+	r = Mbti.objects.get( name = mbti )
+	if not r:
+		raise Http404
+
+	pvlog( request, rid, id, pro_id )
+
+	return HttpResponse( json( {'error': 0, 'ext1': r.ext1, 'ext2': r.ext2, 'ext3': r.ext3, 'ext4': r.ext4, 'ext5': r.ext5, 'ext6': r.ext6, 'ext7': r.ext7 } ) );
+
+
 
 def json(data):
 	encode = settings.DEFAULT_CHARSET
@@ -83,3 +102,11 @@ def dictfetchall(cursor):
 	    dict(zip([col[0] for col in desc], row))
 	    for row in cursor.fetchall()
     ]
+
+def pvlog( request, id, ext1 = None, ext2 = None, ext3 = None ):
+
+	uri = request.META['PATH_INFO']
+	user_agent = request.META['HTTP_USER_AGENT']
+	ip = request.META['REMOTE_ADDR']
+	pv = Pageviewlogs(uid=id, ext1=ext1, ext2=ext2, ext3=ext3, user_agent=user_agent, uri=uri, ip=ip)
+	pv.save()

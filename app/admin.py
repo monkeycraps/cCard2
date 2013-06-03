@@ -4,7 +4,8 @@ from app.models import *
 import xadmin
 
 xadmin.site.register(School)
-xadmin.site.register(ExamResults)
+xadmin.site.register(Mbti)
 xadmin.site.register(Categories)
 xadmin.site.register(Contents)
 xadmin.site.register(Results)
+xadmin.site.register(Pageviewlogs)

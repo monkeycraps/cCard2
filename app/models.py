@@ -124,8 +124,17 @@ class Mbti(models.Model):
     mbti_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50L, blank=True)
     value = models.CharField(max_length=50L, blank=True)
+    ext1 = models.TextField(blank=True)
+    ext2 = models.TextField(blank=True)
+    ext3 = models.TextField(blank=True)
+    ext4 = models.TextField(blank=True)
+    ext5 = models.TextField(blank=True)
+    ext6 = models.TextField(blank=True)
+    ext7 = models.TextField(blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
+    def __unicode__(self):
+        return self.name
     class Meta:
         db_table = 'mbti'
 
@@ -166,3 +175,21 @@ class MbtiSpecialtyPart(models.Model):
     name = models.CharField(max_length=255L, blank=True)
     class Meta:
         db_table = 'mbti_specialty_part'
+
+class Pageviewlogs(models.Model):
+    id = models.AutoField(primary_key=True)
+    uid = models.IntegerField(null=True, blank=True)
+    logtime = models.DateTimeField()
+    user_agent = models.CharField(max_length=512L, blank=True)
+    domain = models.CharField(max_length=255L, blank=True)
+    uri = models.CharField(max_length=2048L)
+    ext1 = models.CharField(max_length=1000L, blank=True)
+    ext2 = models.CharField(max_length=1000L, blank=True)
+    ext3 = models.CharField(max_length=1000L, blank=True)
+    referer = models.CharField(max_length=2048L, blank=True)
+    ip = models.CharField(max_length=100L, blank=True)
+    sessionid = models.CharField(max_length=100L, blank=True)
+    def __unicode__(self):
+        return self.uri
+    class Meta:
+        db_table = 'pageviewlogs'
