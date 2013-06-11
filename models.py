@@ -10,6 +10,14 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+class Area(models.Model):
+    id = models.IntegerField(primary_key=True)
+    areaid = models.IntegerField(db_column='areaID') # Field name made lowercase.
+    area = models.CharField(max_length=20L)
+    fatherid = models.IntegerField(db_column='fatherID') # Field name made lowercase.
+    class Meta:
+        db_table = 'area'
+
 class AuthGroup(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=80L, unique=True)
@@ -73,6 +81,14 @@ class Categories(models.Model):
     class Meta:
         db_table = 'categories'
 
+class City(models.Model):
+    id = models.IntegerField(primary_key=True)
+    cityid = models.IntegerField(db_column='cityID') # Field name made lowercase.
+    city = models.CharField(max_length=20L)
+    fatherid = models.IntegerField(db_column='fatherID') # Field name made lowercase.
+    class Meta:
+        db_table = 'city'
+
 class Contents(models.Model):
     content_id = models.IntegerField(primary_key=True)
     content_category_id = models.IntegerField(null=True, blank=True)
@@ -112,19 +128,6 @@ class DjangoSite(models.Model):
     class Meta:
         db_table = 'django_site'
 
-class ExamResults(models.Model):
-    result_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=50L, blank=True)
-    ext1 = models.TextField(blank=True)
-    ext2 = models.TextField(blank=True)
-    ext3 = models.TextField(blank=True)
-    ext4 = models.TextField(blank=True)
-    ext5 = models.TextField(blank=True)
-    ext6 = models.TextField(blank=True)
-    ext7 = models.TextField(blank=True)
-    class Meta:
-        db_table = 'exam_results'
-
 class Exams(models.Model):
     field_id = models.IntegerField(primary_key=True, db_column='_id') # Field renamed because it started with '_'.
     type = models.TextField(blank=True)
@@ -134,6 +137,7 @@ class Exams(models.Model):
     type_a = models.TextField(blank=True)
     type_b = models.TextField(blank=True)
     imgurl = models.TextField(blank=True)
+    checked = models.IntegerField(null=True, blank=True)
     class Meta:
         db_table = 'exams'
 
@@ -141,6 +145,14 @@ class Mbti(models.Model):
     mbti_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50L, blank=True)
     value = models.CharField(max_length=50L, blank=True)
+    title = models.CharField(max_length=256L, blank=True)
+    ext1 = models.TextField(blank=True)
+    ext2 = models.TextField(blank=True)
+    ext3 = models.TextField(blank=True)
+    ext4 = models.TextField(blank=True)
+    ext5 = models.TextField(blank=True)
+    ext6 = models.TextField(blank=True)
+    ext7 = models.TextField(blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
     class Meta:
@@ -164,6 +176,7 @@ class MbtiProfessionSpecialty(models.Model):
 class MbtiProfessions(models.Model):
     mbti_pro_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50L, blank=True)
+    description = models.TextField(blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
     class Meta:
@@ -200,8 +213,16 @@ class Pageviewlogs(models.Model):
     class Meta:
         db_table = 'pageviewlogs'
 
+class Province(models.Model):
+    id = models.IntegerField(primary_key=True)
+    provinceid = models.IntegerField(db_column='provinceID') # Field name made lowercase.
+    province = models.CharField(max_length=20L)
+    class Meta:
+        db_table = 'province'
+
 class Results(models.Model):
     rid = models.IntegerField(primary_key=True)
+    uid = models.IntegerField(null=True, blank=True)
     e = models.IntegerField(null=True, blank=True)
     i = models.IntegerField(null=True, blank=True)
     s = models.IntegerField(null=True, blank=True)
@@ -210,6 +231,7 @@ class Results(models.Model):
     f = models.IntegerField(null=True, blank=True)
     j = models.IntegerField(null=True, blank=True)
     p = models.IntegerField(null=True, blank=True)
+    mbti = models.CharField(max_length=10L, blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
     class Meta:
@@ -295,6 +317,18 @@ class SchoolSpecialtyRelationsPart(models.Model):
     name = models.CharField(max_length=60L)
     class Meta:
         db_table = 'school_specialty_relations_part'
+
+class User(models.Model):
+    uid = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=32L, blank=True)
+    stu_type = models.CharField(max_length=32L, blank=True)
+    from_prov = models.CharField(max_length=20L, blank=True)
+    mark_cate = models.CharField(max_length=20L, blank=True)
+    mobile = models.CharField(max_length=20L, blank=True)
+    createtime = models.DateTimeField(null=True, blank=True)
+    updatetime = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        db_table = 'user'
 
 class XadminBookmark(models.Model):
     id = models.IntegerField(primary_key=True)

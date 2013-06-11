@@ -13,21 +13,6 @@ import logging, time
 
 logger = logging.getLogger('card')
 
-class ExamResults(models.Model):
-    result_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50L, blank=True)
-    ext1 = models.TextField(blank=True)
-    ext2 = models.TextField(blank=True)
-    ext3 = models.TextField(blank=True)
-    ext4 = models.TextField(blank=True)
-    ext5 = models.TextField(blank=True)
-    ext6 = models.TextField(blank=True)
-    ext7 = models.TextField(blank=True)
-    def __unicode__(self):
-        return self.name;
-    class Meta:
-        db_table = 'exam_results'
-
 class School(models.Model):
     school_id = models.IntegerField(primary_key=True)
     school_name = models.CharField(max_length=100L, blank=True)
@@ -105,6 +90,7 @@ class Contents(models.Model):
 
 class Results(models.Model):
     rid = models.AutoField(primary_key=True) # Field renamed because it started with '_'.
+    uid = models.IntegerField(null=True, blank=True)
     e = models.IntegerField(null=True, blank=True)
     i = models.IntegerField(null=True, blank=True)
     s = models.IntegerField(null=True, blank=True)
@@ -113,6 +99,7 @@ class Results(models.Model):
     f = models.IntegerField(null=True, blank=True)
     j = models.IntegerField(null=True, blank=True)
     p = models.IntegerField(null=True, blank=True)
+    mbti = models.CharField(max_length=10L, blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
     def __unicode__(self):
@@ -139,10 +126,13 @@ class Mbti(models.Model):
         db_table = 'mbti'
 
 class MbtiProfessions(models.Model):
-    mbti_pro_id = models.AutoField(primary_key=True)
+    mbti_pro_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50L, blank=True)
+    description = models.TextField(blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
+    def __unicode__(self):
+        return self.name
     class Meta:
         db_table = 'mbti_professions'
 
@@ -193,3 +183,15 @@ class Pageviewlogs(models.Model):
         return self.uri
     class Meta:
         db_table = 'pageviewlogs'
+
+class User(models.Model):
+    uid = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=32L, blank=True)
+    stu_type = models.CharField(max_length=32L, blank=True)
+    from_prov = models.CharField(max_length=20L, blank=True)
+    mark_cate = models.CharField(max_length=20L, blank=True)
+    mobile = models.CharField(max_length=20L, blank=True)
+    createtime = models.DateTimeField(null=True, blank=True)
+    updatetime = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        db_table = 'user'
