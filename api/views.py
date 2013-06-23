@@ -288,7 +288,34 @@ def school(request):
 
 	s = School.objects.get( school_id=id )
 
-	return HttpResponse( json({ 'error':0, 'name': s.school_name, 'school_detail': s.school_detail, 'school_icon': s.school_icon, 'school_prov': s.area, 'school_type': s.school_type, 'school_category': s.school_category, 'school_property1': s.school_property1, 'school_property2': s.school_property2 }) );
+	specialties = []
+	withpro = get.get( 'withpro', None )
+	if withpro == '1':
+
+		condition_tmp = {}
+
+		from_prov = get.get( 'from_prov', None )
+		if from_prov:
+			from_prov = from_prov.encode( 'utf-8' )
+			from_prov = re.sub( '省$', '', from_prov )
+			from_prov = re.sub( '市$', '', from_prov )
+			condition_tmp['area'] = from_prov
+
+		stu_type = get.get( 'stu_type', None )
+		if stu_type:
+			condition_tmp['type'] = stu_type
+
+		condition = ''
+		if len( condition_tmp ) > 0 : 
+			for key in condition_tmp:
+				condition += ' and '+ key + ' = \''+ condition_tmp[key] +'\' '
+
+		sql = 'select point_id id, specialty_category spe_name, area from_prov, type stu_type, year, point_average, point_height, point_low, level from school_point where school_id = '+ id +' and year = 2012 '+ condition
+		cursor = connection.cursor()
+		cursor.execute( sql )
+		specialties = dictfetchall( cursor )
+
+	return HttpResponse( json({ 'error':0, 'name': s.school_name, 'school_detail': s.school_detail, 'school_icon': s.school_icon, 'school_prov': s.area, 'school_type': s.school_type, 'school_category': s.school_category, 'school_property1': s.school_property1, 'school_property2': s.school_property2, 'specialties': specialties }) );
 
 def sFilter(request): 
 
@@ -330,26 +357,25 @@ def sFilter(request):
 	if name:
 		condition_tmp['s.school_name'] = name
 
-	condition = '';
+	condition = ' where sp.year = 2012 ';
 	params = []
 	if len(condition_tmp) > 0:
-		condition += ' where '
 		for key in condition_tmp:
 			if key == 's.school_name':
-				condition += ' ' + key + ' like ( %s ) and '
+				condition += ' and ' + key + ' like ( %s ) '
 				params.append( '%'+ condition_tmp[key] + '%' )
 			else:
-				condition += ' ' + key + ' = \''+ condition_tmp[key] +'\' and '
+				condition += ' and ' + key + ' = \''+ condition_tmp[key] +'\' '
 		condition = re.sub( 'and $', '', condition )
 
 	sql = 'SELECT s.school_id, s.school_name, s.school_icon FROM school s INNER JOIN school_point sp ON s.school_id = sp.school_id '+ condition + " GROUP BY s.school_id limit "+ str(limit) + ' offset '+ str(offset);
-	logger.info( sql )
+	# logger.info( sql )
 
 	cursor = connection.cursor()
 	cursor.execute( sql, params )
 	list = dictfetchall( cursor )
 
-	return HttpResponse( json({ 'error': 0, 'list': list, 'sql': sql }) )
+	return HttpResponse( json({ 'error': 0, 'list': list }) )
 
 def json(data):
 	encode = settings.DEFAULT_CHARSET
