@@ -9,6 +9,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from djangosphinx.models import SphinxSearch
 import logging, time
 
 logger = logging.getLogger('card')
@@ -42,6 +43,11 @@ class SchoolPoint(models.Model):
     point_height = models.CharField(max_length=100L, blank=True)
     point_low = models.CharField(max_length=100L, blank=True)
     level = models.CharField(max_length=100L, blank=True)
+    search = SphinxSearch(
+        index='ccard', 
+        mode='SPH_MATCH_ANY',
+        rankmode='SPH_RANK_NONE',
+    )
     class Meta:
         db_table = 'school_point'
 
@@ -126,7 +132,7 @@ class Mbti(models.Model):
         db_table = 'mbti'
 
 class MbtiProfessions(models.Model):
-    mbti_pro_id = models.IntegerField(primary_key=True)
+    mbti_pro_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50L, blank=True)
     description = models.TextField(blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
@@ -138,8 +144,10 @@ class MbtiProfessions(models.Model):
 
 class MbtiProfessionRelation(models.Model):
     mbti_pro_rel_id = models.AutoField(primary_key=True)
-    mbti_id = models.ForeignKey(Mbti)
-    mbti_pro_id = models.ForeignKey(MbtiProfessions)
+    mbti_id = models.IntegerField()
+    mbti_pro_id = models.IntegerField()
+    def __unicode__(self):
+        return str(self.mbti_pro_id).ljust(4)
     class Meta:
         db_table = 'mbti_profession_relation'
 
@@ -156,6 +164,8 @@ class MbtiSpecialty(models.Model):
     name = models.CharField(max_length=50L, blank=True)
     createtime = models.DateTimeField(null=True, blank=True)
     updatetime = models.DateTimeField(null=True, blank=True)
+    def __unicode__(self):
+        return self.name
     class Meta:
         db_table = 'mbti_specialty'
 
@@ -185,7 +195,7 @@ class Pageviewlogs(models.Model):
         db_table = 'pageviewlogs'
 
 class User(models.Model):
-    uid = models.IntegerField(primary_key=True)
+    uid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=32L, blank=True)
     stu_type = models.CharField(max_length=32L, blank=True)
     from_prov = models.CharField(max_length=20L, blank=True)

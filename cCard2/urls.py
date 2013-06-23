@@ -32,5 +32,7 @@ urlpatterns += patterns('api.views',
     url(r'^api/getResult', 'getResult'), 
     url(r'^api/mbtiInfo', 'mbtiInfo'), 
     url(r'^api/proInfo', 'proInfo'), 
-	url(r'^api/filter', 'filter'), 
+    url(r'^api/filter', 'filter'), 
+    url(r'^api/sFilter', 'sFilter'), 
+    url(r'^api/school', 'school'), 
 )

@@ -81,14 +81,6 @@ class Categories(models.Model):
     class Meta:
         db_table = 'categories'
 
-class City(models.Model):
-    id = models.IntegerField(primary_key=True)
-    cityid = models.IntegerField(db_column='cityID') # Field name made lowercase.
-    city = models.CharField(max_length=20L)
-    fatherid = models.IntegerField(db_column='fatherID') # Field name made lowercase.
-    class Meta:
-        db_table = 'city'
-
 class Contents(models.Model):
     content_id = models.IntegerField(primary_key=True)
     content_category_id = models.IntegerField(null=True, blank=True)
