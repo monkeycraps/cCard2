@@ -23,7 +23,7 @@ DATABASES = {
         'NAME': 'ccard3',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'root',
-        'PASSWORD': '123',
+        'PASSWORD': 'WqgEmrY=',
         'HOST': '121.199.44.193',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }, 
@@ -182,6 +182,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/ccard.log',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
         'django.request': {
@@ -190,7 +196,7 @@ LOGGING = {
             'propagate': True,
         },
         'card': {
-            'handlers': ['console', 'mail_admins'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         }
     }

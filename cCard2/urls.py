@@ -35,4 +35,5 @@ urlpatterns += patterns('api.views',
     url(r'^api/filter', 'filter'), 
     url(r'^api/sFilter', 'sFilter'), 
     url(r'^api/school', 'school'), 
+    url(r'^api/updatePoint', 'updatePoint'), 
 )

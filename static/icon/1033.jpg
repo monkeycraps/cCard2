@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<title>中国高校网址大全|中国高校导航|中国高校校内网址导航</title>
+<meta name="keywords" content="中国高校导航,高校网址导航,高校网址大全,大学网址大全,校内导航,高校排名,大学排名">
+<meta name="description" content="中国高校导航网提供了中国各大学（学院）网址、高校校内网址导航、大学排名等功能">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link href="/template/defaulttemplate/front/images/frontstyle.css" rel="stylesheet" type="text/css">
+<body>
+<br><br><br>
+<div align=center width="100%"><font size="3">对不起，您访问的页面没有找到,可能是网站目录已作更新，请您访问<a href="/"><u>本站首页！</u></a>或者直接搜索：</font>
+<br><br></div>
+<div align="center" width="100%">
+  <form action="/search.jsp" method="post">
+     <span id="SEARCH1">
+      <label>
+        <input type="text" name="searchword" value="请输入学校或机构名称" id="textfield" onClick="javascript:this.value='';"/>
+      </label>
+      </span>
+      <span><input name="" type="image"  src="/template/defaulttemplate/front/images/index_03.gif"/></span>
+   </form>
+</div>
+</body>
+</html>
