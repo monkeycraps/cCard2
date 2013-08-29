@@ -29,14 +29,15 @@ act = ''
 if len(args) > 1:
 	act = args[1]
 
-if 'update-point' == act:
-	print 'update point'
+if 'fix-point' == act:
+	print 'fix point'
 
 	i = 0;
+	size = 1000
 
 	while( True ):
 
-		sql = 'select * from school_point order by point_id limit '+ str(i) + ', 1000';
+		sql = 'select * from school_point order by point_id limit '+ str(i) + ', '+ str( size );
 
 		cursor = connection.cursor()
 		cursor.execute( sql )
@@ -45,28 +46,47 @@ if 'update-point' == act:
 		if not rs: 
 			break;
 
-		for one in rs: 
+		for one in rs:
+			# print one
 			# 加入school_point3
-			sql = 'select * from school_point2 where school_id = ' + str(one['school_id']) + ' and \
+
+			# 有大于等于他的
+			sql = 'select * from school_point3 where school_id = ' + str(one['school_id']) + ' and \
+				specialty_category = \'' + str(one['specialty_category'])+ '\' and \
+				area = \'' + str(one['area'])+ '\' and type = \'' + str(one['type'])+ '\' \
+				and year >= ' + str(one['year']);
+			cursor.execute( sql )
+			rs2 = dictfetchall( cursor );
+			if rs2:
+				# print 'continue'
+				continue;
+
+			# 有小于他的
+			sql = 'select * from school_point3 where school_id = ' + str(one['school_id']) + ' and \
 				specialty_category = \'' + str(one['specialty_category'])+ '\' and \
 				area = \'' + str(one['area'])+ '\' and type = \'' + str(one['type'])+ '\' \
 				and year < ' + str(one['year']);
 			cursor.execute( sql )
 			rs1 = dictfetchall( cursor );
 			if rs1:
+				# print 'delete'
 				# 删除
 				for one1 in rs1:
-					sql = 'delete from school_point2 where point_id = '+ str(one1['point_id'])
+					sql = 'delete from school_point3 where point_id = '+ str(one1['point_id'])
 					cursor.execute( sql )
 
-			sql = 'insert into school_point2 ( point_id, school_id, school_name, specialty_category, area, type, year, point_average, point_height, point_low, level ) values ( '+ str(one['point_id']) +', '+ str(one['school_id']) +', \''+ str(one['school_name']) +'\', \''+ str(one['specialty_category']) +'\', \''+ str(one['area']) +'\', \''+ str(one['type']) +'\', \''+ str(one['year']) +'\', \''+ str(one['point_average']) +'\', \''+ str(one['point_height']) +'\', \''+ str(one['point_low']) +'\', \''+ str(one['level']) +'\' )' 
+			# print 'insert'
+
+			sql = 'insert into school_point3 ( point_id, school_id, school_name, specialty_category, area, type, year,\
+				point_average, point_height, point_low, level ) \
+				values ( '+ str(one['point_id']) +', '+ str(one['school_id']) +', \''+ str(one['school_name']) +'\', \
+				\''+ str(one['specialty_category']) +'\', \''+ str(one['area']) +'\', \''+ str(one['type']) +'\', \''+ \
+				str(one['year']) +'\', \''+ str(one['point_average']) +'\', \''+ str(one['point_height']) +'\', \''+ \
+				str(one['point_low']) +'\', \''+ str(one['level']) +'\' )' 
 			cursor.execute( sql )
 
-		i = i + 1000
+		i = i + size
 		print i
-		# break;
-	
-	return HttpResponse( json( {'error': 0, 'uid': 0 } ) );
 
 if 'fix-spe' == act:
 	print 'fixspe start'

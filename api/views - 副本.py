@@ -47,41 +47,6 @@ host = "http://121.199.44.193"
 # # you can also access a similar set of meta data on the queryset itself (once it's been sliced or executed in any way)
 # print results1._sphinx
 
-def updatePoint(request):
-
-	i = 258000;
-
-	while( True ):
-
-		sql = 'select * from school_point where point_id >= 258000 order by point_id limit '+ str(i) + ', 1000';
-
-		cursor = connection.cursor()
-		cursor.execute( sql )
-		rs = dictfetchall( cursor )
-
-		if not rs: 
-			break;
-
-		for one in rs: 
-			# 加入school_point3
-			sql = 'select * from school_point3 where school_id = ' + str(one['school_id']) + ' and specialty_category = \'' + str(one['specialty_category'])+ '\' and area = \'' + str(one['area'])+ '\' and type = \'' + str(one['type'])+ '\' and year < ' + str(one['year']);
-			cursor.execute( sql )
-			rs1 = dictfetchall( cursor );
-			if rs1:
-				# 删除
-				for one1 in rs1:
-					sql = 'delete from school_point3 where point_id = '+ str(one1['point_id'])
-					cursor.execute( sql )
-
-			sql = 'insert into school_point3 ( point_id, school_id, school_name, specialty_category, area, type, year, point_average, point_height, point_low, level ) values ( '+ str(one['point_id']) +', '+ str(one['school_id']) +', \''+ str(one['school_name']) +'\', \''+ str(one['specialty_category']) +'\', \''+ str(one['area']) +'\', \''+ str(one['type']) +'\', \''+ str(one['year']) +'\', \''+ str(one['point_average']) +'\', \''+ str(one['point_height']) +'\', \''+ str(one['point_low']) +'\', \''+ str(one['level']) +'\' )' 
-			cursor.execute( sql )
-
-		i = i + 1000
-		logger.info( i )
-		# break;
-	
-	return HttpResponse( json( {'error': 0, 'uid': 0 } ) );
-
 def createUser(request):
 
 	get = request.REQUEST;
@@ -249,7 +214,7 @@ def filter(request):
 
 	# 获取分组信息
 	ss = SphinxQuerySet(
-        index='ccard', 
+        index='ccard2', 
         mode=mode,
         rankmode='SPH_RANK_NONE',
         limit = limit,  
@@ -259,12 +224,12 @@ def filter(request):
     );
 	# ss.setm
 
-	from_prov = get.get( 'from_prov', None )
-	if from_prov:
-		from_prov = from_prov.encode( 'utf-8' )
-		from_prov = re.sub( '省$', '', from_prov )
-		from_prov = re.sub( '市$', '', from_prov )
-		ss = ss.filter( from_prov=mccrc32( from_prov ))
+	# from_prov = get.get( 'from_prov', None )
+	# if from_prov:
+	# 	from_prov = from_prov.encode( 'utf-8' )
+	# 	from_prov = re.sub( '省$', '', from_prov )
+	# 	from_prov = re.sub( '市$', '', from_prov )
+	# 	ss = ss.filter( from_prov=mccrc32( from_prov ))
 
 	school_prov = get.get( 'school_prov', None )
 	if school_prov:
@@ -273,9 +238,9 @@ def filter(request):
 		school_prov = re.sub( '市$', '', school_prov )
 		ss = ss.filter( school_prov=mccrc32( school_prov ))
 
-	stu_type = get.get( 'stu_type', None )
-	if stu_type:
-		ss = ss.filter( stu_type=mccrc32( stu_type ))
+	# stu_type = get.get( 'stu_type', None )
+	# if stu_type:
+	# 	ss = ss.filter( stu_type=mccrc32( stu_type ))
 
 	level = get.get( 'level', None )
 	if level:
@@ -293,6 +258,8 @@ def filter(request):
 	i = 0
 	for one in list(r):
 		id = one.get( 'id' )
+		logger.info( one )
+		logger.info( id )
 		rs_list[i] = str(id)
 		ids.append(str(id))
 		i = i+1
@@ -300,7 +267,10 @@ def filter(request):
 	# 获取学校
 	rs_list_out = {}
 	if len(ids) > 0 :
-		sql = 'select mp.point_id, s.school_id, s.school_name, s.area as school_prov, s.school_icon, s.school_type, s.school_property1, s.school_property2, s.school_url from school s inner join school_point3 mp on s.school_id = mp.school_id where mp.point_id in ( '+ (', '.join(ids)) +' )'
+		sql = 'select sr.relation_id, s.school_id, s.school_name, s.area as school_prov, s.school_icon, s.school_type, \
+		 	s.school_property1, s.school_property2, s.school_url from school s \
+		 	inner join school_specialty_relations sr on s.school_id = sr.school_id \
+		 	where sr.relation_id in ( '+ (', '.join(ids)) +' )'
 		tmp = {}
 		cursor = connection.cursor()
 		cursor.execute( sql )
@@ -308,7 +278,7 @@ def filter(request):
 		for one in rs: 
 			if one['school_icon']:
 				one['school_icon'] = host+ '/static'+ one['school_icon'];
-			tmp[str(one['point_id'])] = one
+			tmp[str(one['relation_id'])] = one
 
 			# logger.info( one['school_name'].encode( 'utf-8' ) )
 
@@ -322,79 +292,82 @@ def filter(request):
 			rs_list_out[school_id_key] = rs_list[key]
 
 	# 获取对应专业和对应情况
-	# if len(rs_list_out) > 0 :
-	# 	# 获取分组信息
-	# 	ss = SphinxQuerySet(
-	#         index='ccard', 
-	#         mode=mode,
-	#         rankmode='SPH_RANK_NONE',
-	#         limit = 1000,  
-	#         # offset= (page - 1) * limit , 
-	#         # groupby='school_id', 
-	#         # groupsort='school_id', 
-	#     );
-	# 	# ss.setm
+	if len(rs_list_out) > 0 :
+		# 获取分组信息
+		ss = SphinxQuerySet(
+	        index='ccard2', 
+	        mode=mode,
+	        rankmode='SPH_RANK_NONE',
+	        limit = 1000,  
+	        # offset= (page - 1) * limit , 
+	        # groupby='school_id', 
+	        # groupsort='school_id', 
+	    );
+		# ss.setm
 
-	# 	from_prov = get.get( 'from_prov', None )
-	# 	if from_prov:
-	# 		from_prov = from_prov.encode( 'utf-8' )
-	# 		from_prov = re.sub( '省$', '', from_prov )
-	# 		from_prov = re.sub( '市$', '', from_prov )
-	# 		ss = ss.filter( from_prov=mccrc32( from_prov ))
+		# from_prov = get.get( 'from_prov', None )
+		# if from_prov:
+		# 	from_prov = from_prov.encode( 'utf-8' )
+		# 	from_prov = re.sub( '省$', '', from_prov )
+		# 	from_prov = re.sub( '市$', '', from_prov )
+		# 	ss = ss.filter( from_prov=mccrc32( from_prov ))
 
-	# 	school_prov = get.get( 'school_prov', None )
-	# 	if school_prov:
-	# 		school_prov = school_prov.encode( 'utf-8' )
-	# 		school_prov = re.sub( '省$', '', school_prov )
-	# 		school_prov = re.sub( '市$', '', school_prov )
-	# 		ss = ss.filter( school_prov=mccrc32( school_prov ))
+		school_prov = get.get( 'school_prov', None )
+		if school_prov:
+			school_prov = school_prov.encode( 'utf-8' )
+			school_prov = re.sub( '省$', '', school_prov )
+			school_prov = re.sub( '市$', '', school_prov )
+			ss = ss.filter( school_prov=mccrc32( school_prov ))
 
-	# 	stu_type = get.get( 'stu_type', None )
-	# 	if stu_type:
-	# 		ss = ss.filter( stu_type=mccrc32( stu_type ))
+		# stu_type = get.get( 'stu_type', None )
+		# if stu_type:
+		# 	ss = ss.filter( stu_type=mccrc32( stu_type ))
 
-	# 	level = get.get( 'level', None )
-	# 	if level:
-	# 		ss = ss.filter( level=mccrc32( level ))
+		level = get.get( 'level', None )
+		if level:
+			ss = ss.filter( level=mccrc32( level ))
 
-	# 	# school_id = get.get( 'school_id', None )
-	# 	# if school_id:
-	# 	for key in rs_list_out:
-	# 		ss = ss.filter( school_id=key )
+		# school_id = get.get( 'school_id', None )
+		# if school_id:
+		for key in rs_list_out:
+			ss = ss.filter( school_id=key )
 
-	# 	r = ss.query( to_query ).order_by('@weight')
-	# 	# for one in r._sphinx:
+		r = ss.query( to_query ).order_by('@weight')
+		# for one in r._sphinx:
 
-	# 	ids = []
-	# 	for one in list(r):
-	# 		id = one.get( 'id' )
-	# 		ids.append(str(id))
-	# 	# logger.info( ids )
+		ids = []
+		for one in list(r):
+			id = one.get( 'id' )
+			ids.append(str(id))
+		# logger.info( ids )
 
-	# 	# logger.info( ids )
-	# 	if len(ids) > 0 :
-	# 		sql = 'select s.school_id, mp.point_id, mp.specialty_category, mp.area as from_prov, mp.type as stu_type, mp.year, mp.point_average, mp.point_height, mp.point_low, mp.level from school s inner join school_point3 mp on s.school_id = mp.school_id where mp.point_id in ( '+ (', '.join(ids)) +' )'
-	# 		# logger.info( sql )
-	# 		tmp = {}
-	# 		cursor = connection.cursor()
-	# 		cursor.execute( sql )
-	# 		rs = dictfetchall( cursor )
-	# 		for one in rs: 
-	# 			if not tmp.has_key( str(one['school_id']) ):
-	# 				tmp[str(one['school_id'])] = []
-	# 			tmp[str(one['school_id'])].append( one )
-	# 		# logger.info( tmp )
-	# 		# logger.info( len(tmp) )
+		# logger.info( ids )
+		if len(ids) > 0 :
+			sql = 'select sr.relation_id, sr.school_id, sr.specialty_name, mp.point_id, mp.area as from_prov, mp.type as stu_type, \
+				mp.year, mp.point_average, mp.point_height, mp.point_low, mp.level from school_specialty_relations sr \
+				left join school_point3 mp on sr.relation_id = mp.relation_id \
+				where sr.relation_id in ( '+ (', '.join(ids)) +' )'
+			# logger.info( sql )
+			tmp = {}
+			cursor = connection.cursor()
+			cursor.execute( sql )
+			rs = dictfetchall( cursor )
+			for one in rs: 
+				if not tmp.has_key( str(one['school_id']) ):
+					tmp[str(one['school_id'])] = []
+				tmp[str(one['school_id'])].append( one )
+			# logger.info( tmp )
+			# logger.info( len(tmp) )
 
-	# 		for key, one in rs_list_out.iteritems():
-	# 			if tmp.has_key(str(one['school_id'])):
-	# 				rs_list_out[key]['specialties'] = tmp[str(one['school_id'])]
-
+			for key, one in rs_list_out.iteritems():
+				if tmp.has_key(str(one['school_id'])):
+					rs_list_out[key]['specialties'] = tmp[str(one['school_id'])]
 	# return HttpResponse( s );
 	rs_list_out_arr = [];
 	for key in rs_list_out: 
 		# logger.info( key )
 		rs_list_out_arr.append( rs_list_out[key] )
+		logger.info( "len: "+ str(len( rs_list_out[key] )) )
 
 	return HttpResponse( json({ 'error':0, 'page': page, 'limit': limit, 'rs_list': rs_list_out_arr }) );
 
